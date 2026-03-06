@@ -1,0 +1,19 @@
+Package: open-agenda
+Architecture: all
+Version: 1.2.0
+Maintainer: Open-Agenda Team <team@open-agenda.org>
+Depends: python3, python3-tk
+Description: Open-Agenda v1.2 - Firefox-Style Modern UI
+ The best agenda in the world - Now with Firefox-style UI!
+ .
+ Features:
+  - Firefox-style modern 2025 interface
+  - Tab-based navigation (Calendar, Events, Dashboard, Settings)
+  - Rounded corners and glass effects
+  - Auto-save
+  - Dark/Light theme toggle
+  - Global search
+  - Dashboard with statistics
+  - Export to JSON/CSV
+  - Import from JSON
+  - Fully open source!
