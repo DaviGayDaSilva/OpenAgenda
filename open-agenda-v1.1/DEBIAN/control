@@ -1,0 +1,22 @@
+Package: open-agenda
+Architecture: all
+Version: 1.1.0
+Maintainer: Open-Agenda Team <team@open-agenda.org>
+Depends: python3, python3-tk
+Description: Open-Agenda v1.1 - The Ultimate Smart Calendar
+ The best agenda in the world - Ultra modern 2025 interface!
+ .
+ Features:
+  - Ultra modern 2025 dark interface with gradients
+  - Auto-save - Your data is always saved!
+  - Multiple calendars (personal, work, family, health)
+  - Color categories for events
+  - Priority levels (high, medium, low)
+  - Light/Dark theme toggle
+  - Search events
+  - Export to JSON, CSV, ICS formats
+  - Statistics dashboard
+  - Keyboard shortcuts
+  - Recurring events (daily, weekly, monthly, yearly)
+  - Location and notes fields
+  - Fully open source and free!
