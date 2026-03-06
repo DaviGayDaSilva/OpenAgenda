@@ -1,0 +1,15 @@
+Package: open-agenda
+Architecture: all
+Version: 1.0.0
+Maintainer: Open-Agenda Team <team@open-agenda.org>
+Depends: python3, python3-tk
+Description: Open-Agenda - Smart Local Calendar & Task Manager
+ The best agenda in the world - Open Source, intelligent and easy to use!
+ .
+ Features:
+  - Beautiful modern dark interface
+  - Interactive monthly calendar
+  - Add, edit and delete events
+  - Save and load data from JSON files
+  - Local storage - your data stays on your device
+  - Fully open source and free!
