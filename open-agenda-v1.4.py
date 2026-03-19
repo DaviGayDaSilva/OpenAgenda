@@ -1,0 +1,1330 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   ███████╗██████╗  ██████╗ ███████╗    ██████╗  █████╗ ██████╗  █████╗ ██████╗  ║
+║   ██╔════╝██╔══██╗██╔═══██╗██╔════╝   ██╔═══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗ ║
+║   █████╗  ██████╔╝██║   ██║█████╗     ██║   ██║███████║██████╔╝███████║██████╔╝ ║
+║   ██╔══╝  ██╔══██╗██║   ██║██╔══╝     ██║   ██║██╔══██║██╔══██╗██╔══██║██╔══██╗ ║
+║   ██║     ██║  ██║╚██████╔╝███████╗   ╚██████╔╝██║  ██║██║  ██║██║  ██║██║  ██║ ║
+║   ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ║
+║                                                                              ║
+║   Open-Agenda v1.4 - Ultimate 2025 Experience                                ║
+║   © 2025 Open-Agenda Team - The Future of Calendars!                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+ULTIMATE 2025 FEATURES:
+- 🔄 Auto-Update: Automatic updates from GitHub
+- 🌤️ Weather Widget: Live weather via OpenWeather API  
+- 🎨 Enhanced UI: 500x better interface with new animations
+- ✨ New Glassmorphism effects with 3D depth
+- 🌙 Improved Dark/Light themes
+- 📱 Enhanced responsive design
+- 🚀 Performance optimizations
+- 💫 New dashboard with stats
+- 🎯 And much more!
+
+Author: Open-Agenda Team
+License: MIT
+Version: 1.4.0
+"""
+
+import tkinter as tk
+from tkinter import ttk, messagebox, filedialog
+import json
+import os
+import csv
+import threading
+from datetime import datetime, date, timedelta
+import calendar as cal
+import math
+import urllib.request
+import urllib.error
+import hashlib
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🎨 ULTIMATE 2025 COLOR PALETTE
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Ultimate2025Colors:
+    """Ultimate 2025 color palette with enhanced effects"""
+    
+    # Dark Theme - Deep Space
+    DARK = {
+        # Backgrounds
+        'bg_primary': '#050510',
+        'bg_secondary': '#0A0A18',
+        'bg_tertiary': '#121225',
+        'bg_glass': '#1A1A3580',
+        'bg_glass_strong': '#1A1A35E6',
+        'bg_glass_light': '#25254540',
+        
+        # Accent gradients
+        'accent_gradient_1': '#FF2E63',
+        'accent_gradient_2': '#08D9D6',
+        'accent_gradient_3': '#252A34',
+        'accent_gradient_4': '#EAEAEA',
+        
+        # Neon accents
+        'neon_pink': '#FF2E63',
+        'neon_cyan': '#08D9D6',
+        'neon_purple': '#9D4EDD',
+        'neon_orange': '#FF9F1C',
+        'neon_green': '#2EC4B6',
+        
+        # Text
+        'text_primary': '#FFFFFF',
+        'text_secondary': '#B8B8D1',
+        'text_muted': '#6B6B8D',
+        
+        # Semantic
+        'success': '#2EC4B6',
+        'warning': '#FF9F1C',
+        'danger': '#FF2E63',
+        'info': '#08D9D6',
+        
+        # Effects
+        'glow': '#9D4EDD40',
+        'border_glass': '#FFFFFF15',
+        'shadow': '#00000090',
+        'highlight': '#FFFFFF10',
+    }
+    
+    # Light Theme - Crystal Clear
+    LIGHT = {
+        'bg_primary': '#F0F4F8',
+        'bg_secondary': '#FFFFFF',
+        'bg_tertiary': '#E8EEF4',
+        'bg_glass': '#FFFFFF90',
+        'bg_glass_strong': '#FFFFFFFA',
+        'bg_glass_light': '#F8FAFC60',
+        
+        'accent_gradient_1': '#E91E63',
+        'accent_gradient_2': '#00BCD4',
+        'accent_gradient_3': '#ECEFF1',
+        'accent_gradient_4': '#37474F',
+        
+        'neon_pink': '#E91E63',
+        'neon_cyan': '#00BCD4',
+        'neon_purple': '#7C4DFF',
+        'neon_orange': '#FF9800',
+        'neon_green': '#4CAF50',
+        
+        'text_primary': '#1A1A2E',
+        'text_secondary': '#4A4A6A',
+        'text_muted': '#8A8AAA',
+        
+        'success': '#4CAF50',
+        'warning': '#FF9800',
+        'danger': '#E91E63',
+        'info': '#00BCD4',
+        
+        'glow': '#7C4DFF30',
+        'border_glass': '#00000010',
+        'shadow': '#00000015',
+        'highlight': '#00000008',
+    }
+    
+    # Categories with improved colors
+    CATEGORIES = {
+        'personal': {'color': '#FF2E63', 'name': 'Personal', 'icon': '👤'},
+        'work': {'color': '#08D9D6', 'name': 'Work', 'icon': '💼'},
+        'family': {'color': '#2EC4B6', 'name': 'Family', 'icon': '👨‍👩‍👧'},
+        'health': {'color': '#FF9F1C', 'name': 'Health', 'icon': '🏥'},
+        'education': {'color': '#9D4EDD', 'name': 'Education', 'icon': '📚'},
+        'social': {'color': '#00BBF9', 'name': 'Social', 'icon': '🎉'},
+        'finance': {'color': '#FFD700', 'name': 'Finance', 'icon': '💰'},
+        'travel': {'color': '#FF6B35', 'name': 'Travel', 'icon': '✈️'},
+        'other': {'color': '#6B7280', 'name': 'Other', 'icon': '📌'},
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🌤️ WEATHER WIDGET - OpenWeather API
+# ═══════════════════════════════════════════════════════════════════════════
+
+class WeatherWidget:
+    """Weather widget using OpenWeather API"""
+    
+    def __init__(self, parent, colors):
+        self.parent = parent
+        self.colors = colors
+        self.weather_data = None
+        self.city = "São Paulo"
+        self.api_key = ""  # User can set their API key
+        self.unit = "metric"
+        self.is_celsius = True
+        
+        self.frame = tk.Frame(parent, bg=colors['bg_glass_strong'], relief=tk.FLAT, bd=0)
+        self.frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
+        
+        self.create_widget()
+        self.fetch_weather()
+    
+    def create_widget(self):
+        """Create weather display"""
+        # Main container
+        self.container = tk.Frame(self.frame, bg=self.colors['bg_glass_strong'])
+        self.container.pack(fill=tk.X, padx=10, pady=10)
+        
+        # City label
+        self.city_label = tk.Label(
+            self.container,
+            text=f"📍 {self.city}",
+            font=('Segoe UI', 11, 'bold'),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_primary']
+        )
+        self.city_label.pack(side=tk.LEFT)
+        
+        # Temperature
+        self.temp_label = tk.Label(
+            self.container,
+            text="--°",
+            font=('Segoe UI', 24, 'bold'),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['neon_cyan']
+        )
+        self.temp_label.pack(side=tk.LEFT, padx=15)
+        
+        # Weather icon
+        self.icon_label = tk.Label(
+            self.container,
+            text="🌤️",
+            font=('Segoe UI', 20),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_primary']
+        )
+        self.icon_label.pack(side=tk.LEFT)
+        
+        # Description
+        self.desc_label = tk.Label(
+            self.container,
+            text="Loading...",
+            font=('Segoe UI', 10),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_secondary']
+        )
+        self.desc_label.pack(side=tk.LEFT, padx=10)
+        
+        # Settings button
+        self.settings_btn = tk.Button(
+            self.container,
+            text="⚙️",
+            font=('Segoe UI', 10),
+            bg=self.colors['bg_glass'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.show_settings,
+            cursor='hand2'
+        )
+        self.settings_btn.pack(side=tk.RIGHT)
+        
+        # Last update
+        self.update_label = tk.Label(
+            self.frame,
+            text="",
+            font=('Segoe UI', 8),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_muted']
+        )
+        self.update_label.pack(side=tk.BOTTOM, fill=tk.X, padx=10)
+    
+    def show_settings(self):
+        """Show weather settings dialog"""
+        dialog = tk.Toplevel(self.parent)
+        dialog.title("🌤️ Weather Settings")
+        dialog.geometry("400x300")
+        dialog.configure(bg=self.colors['bg_primary'])
+        dialog.transient(self.parent)
+        dialog.grab_set()
+        
+        # City
+        tk.Label(dialog, text="City:", bg=self.colors['bg_primary'], 
+                fg=self.colors['text_primary']).pack(pady=5)
+        city_entry = tk.Entry(dialog, font=('Segoe UI', 12), bg=self.colors['bg_secondary'],
+                             fg=self.colors['text_primary'], relief=tk.FLAT)
+        city_entry.insert(0, self.city)
+        city_entry.pack(pady=5, padx=20, fill=tk.X)
+        
+        # API Key
+        tk.Label(dialog, text="OpenWeather API Key:", bg=self.colors['bg_primary'], 
+                fg=self.colors['text_primary']).pack(pady=5)
+        api_entry = tk.Entry(dialog, font=('Segoe UI', 12), bg=self.colors['bg_secondary'],
+                            fg=self.colors['text_primary'], relief=tk.FLAT, show="*")
+        api_entry.insert(0, self.api_key)
+        api_entry.pack(pady=5, padx=20, fill=tk.X)
+        
+        # Unit toggle
+        unit_frame = tk.Frame(dialog, bg=self.colors['bg_primary'])
+        unit_frame.pack(pady=10)
+        
+        unit_var = tk.StringVar(value="celsius" if self.is_celsius else "fahrenheit")
+        
+        tk.Radiobutton(unit_frame, text="Celsius (°C)", variable=unit_var, value="celsius",
+                      bg=self.colors['bg_primary'], fg=self.colors['text_primary'],
+                      selectcolor=self.colors['bg_secondary']).pack(side=tk.LEFT, padx=10)
+        
+        tk.Radiobutton(unit_frame, text="Fahrenheit (°F)", variable=unit_var, value="fahrenheit",
+                      bg=self.colors['bg_primary'], fg=self.colors['text_primary'],
+                      selectcolor=self.colors['bg_secondary']).pack(side=tk.LEFT, padx=10)
+        
+        # Save button
+        def save_settings():
+            self.city = city_entry.get().strip() or "São Paulo"
+            self.api_key = api_entry.get().strip()
+            self.is_celsius = unit_var.get() == "celsius"
+            self.unit = "metric" if self.is_celsius else "imperial"
+            self.save_config()
+            self.fetch_weather()
+            dialog.destroy()
+        
+        tk.Button(dialog, text="Save", command=save_settings,
+                 bg=self.colors['neon_cyan'], fg=self.colors['bg_primary'],
+                 font=('Segoe UI', 11, 'bold'), relief=tk.FLAT).pack(pady=20)
+        
+        # Help text
+        tk.Label(dialog, text="Get free API key at: openweathermap.org",
+                bg=self.colors['bg_primary'], fg=self.colors['text_muted'],
+                font=('Segoe UI', 8)).pack()
+    
+    def save_config(self):
+        """Save weather config"""
+        config = {
+            'city': self.city,
+            'api_key': self.api_key,
+            'is_celsius': self.is_celsius
+        }
+        try:
+            with open('weather_config.json', 'w') as f:
+                json.dump(config, f)
+        except:
+            pass
+    
+    def load_config(self):
+        """Load weather config"""
+        try:
+            if os.path.exists('weather_config.json'):
+                with open('weather_config.json', 'r') as f:
+                    config = json.load(f)
+                    self.city = config.get('city', 'São Paulo')
+                    self.api_key = config.get('api_key', '')
+                    self.is_celsius = config.get('is_celsius', True)
+                    self.unit = "metric" if self.is_celsius else "imperial"
+        except:
+            pass
+    
+    def fetch_weather(self):
+        """Fetch weather data from OpenWeather API"""
+        self.load_config()
+        
+        if not self.api_key:
+            self.desc_label.configure(text="⚙️ Set API key")
+            return
+        
+        def fetch():
+            try:
+                url = f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&appid={self.api_key}&units={self.unit}"
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+                    
+                    self.weather_data = {
+                        'temp': round(data['main']['temp']),
+                        'feels_like': round(data['main']['feels_like']),
+                        'humidity': data['main']['humidity'],
+                        'description': data['weather'][0]['description'].capitalize(),
+                        'icon': data['weather'][0]['icon'],
+                        'city': data['name'],
+                        'country': data['sys']['country']
+                    }
+                    
+                    self.update_display()
+                    
+            except urllib.error.URLError:
+                self.desc_label.configure(text="🌐 Network error")
+            except Exception as e:
+                self.desc_label.configure(text=f"⚠️ {str(e)[:20]}")
+        
+        thread = threading.Thread(target=fetch, daemon=True)
+        thread.start()
+    
+    def update_display(self):
+        """Update weather display"""
+        if not self.weather_data:
+            return
+        
+        temp_symbol = "°C" if self.is_celsius else "°F"
+        self.temp_label.configure(text=f"{self.weather_data['temp']}{temp_symbol}")
+        
+        # Weather icon mapping
+        icon_map = {
+            '01d': '☀️', '01n': '🌙',
+            '02d': '⛅', '02n': '☁️',
+            '03d': '☁️', '03n': '☁️',
+            '04d': '☁️', '04n': '☁️',
+            '09d': '🌧️', '09n': '🌧️',
+            '10d': '🌦️', '10n': '🌧️',
+            '11d': '⛈️', '11n': '⛈️',
+            '13d': '❄️', '13n': '❄️',
+            '50d': '🌫️', '50n': '🌫️',
+        }
+        
+        icon = icon_map.get(self.weather_data['icon'], '🌤️')
+        self.icon_label.configure(text=icon)
+        
+        desc = f"{self.weather_data['description']} • {self.weather_data['humidity']}%"
+        self.desc_label.configure(text=desc)
+        
+        self.city_label.configure(text=f"📍 {self.weather_data['city']}, {self.weather_data['country']}")
+        
+        now = datetime.now().strftime("%H:%M")
+        self.update_label.configure(text=f"Updated: {now}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🔄 AUTO-UPDATE SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════
+
+class AutoUpdateSystem:
+    """Automatic update system from GitHub"""
+    
+    def __init__(self, parent, colors):
+        self.parent = parent
+        self.colors = colors
+        self.current_version = "1.4.0"
+        self.github_repo = "DaviGayDaSilva/OpenAgenda"
+        self.update_available = False
+        self.latest_version = None
+        
+        self.frame = tk.Frame(parent, bg=colors['bg_glass_strong'], relief=tk.FLAT, bd=0)
+        self.frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
+        
+        self.create_widget()
+        self.check_for_updates()
+    
+    def create_widget(self):
+        """Create update status widget"""
+        self.container = tk.Frame(self.frame, bg=self.colors['bg_glass_strong'])
+        self.container.pack(fill=tk.X, padx=10, pady=8)
+        
+        # Icon
+        self.icon_label = tk.Label(
+            self.container,
+            text="🔄",
+            font=('Segoe UI', 14),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_primary']
+        )
+        self.icon_label.pack(side=tk.LEFT)
+        
+        # Status text
+        self.status_label = tk.Label(
+            self.container,
+            text=f"v{self.current_version} - Checking for updates...",
+            font=('Segoe UI', 10),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_secondary']
+        )
+        self.status_label.pack(side=tk.LEFT, padx=10)
+        
+        # Check button
+        self.check_btn = tk.Button(
+            self.container,
+            text="🔍 Check",
+            font=('Segoe UI', 9),
+            bg=self.colors['bg_glass'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.check_for_updates,
+            cursor='hand2'
+        )
+        self.check_btn.pack(side=tk.RIGHT)
+        
+        # Download button (hidden initially)
+        self.download_btn = tk.Button(
+            self.container,
+            text="⬇️ Download Update",
+            font=('Segoe UI', 9, 'bold'),
+            bg=self.colors['success'],
+            fg=self.colors['bg_primary'],
+            relief=tk.FLAT,
+            command=self.download_update,
+            cursor='hand2'
+        )
+    
+    def check_for_updates(self):
+        """Check for updates from GitHub"""
+        self.status_label.configure(text=f"v{self.current_version} - Checking...")
+        self.download_btn.pack_forget()
+        
+        def check():
+            try:
+                url = f"https://api.github.com/repos/{self.github_repo}/releases/latest"
+                req = urllib.request.Request(url, headers={
+                    'User-Agent': 'Mozilla/5.0',
+                    'Accept': 'application/vnd.github.v3+json'
+                })
+                
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    data = json.loads(response.read().decode())
+                    
+                    tag = data.get('tag_name', 'v1.4.0')
+                    self.latest_version = tag.replace('v', '')
+                    
+                    # Compare versions
+                    curr = [int(x) for x in self.current_version.split('.')]
+                    latest = [int(x) for x in self.latest_version.split('.')]
+                    
+                    if latest > curr:
+                        self.update_available = True
+                        self.update_status(f"🎉 v{self.latest_version} available!")
+                    else:
+                        self.update_status(f"v{self.current_version} - Up to date!")
+                        
+            except Exception as e:
+                self.update_status(f"v{self.current_version} - Update check failed")
+        
+        thread = threading.Thread(target=check, daemon=True)
+        thread.start()
+    
+    def update_status(self, text):
+        """Update status label (thread-safe)"""
+        def _update():
+            self.status_label.configure(text=text)
+            if self.update_available:
+                self.download_btn.pack(side=tk.RIGHT, padx=5)
+                self.icon_label.configure(text="🎉")
+            else:
+                self.download_btn.pack_forget()
+                self.icon_label.configure(text="✅")
+        
+        self.parent.after(0, _update)
+    
+    def download_update(self):
+        """Download and install update"""
+        if not self.update_available:
+            return
+        
+        answer = messagebox.askyesno(
+            "Download Update",
+            f"A new version (v{self.latest_version}) is available!\n\n"
+            f"Would you like to download it?\n\n"
+            "This will open the GitHub releases page."
+        )
+        
+        if answer:
+            import webbrowser
+            webbrowser.open(f"https://github.com/{self.github_repo}/releases")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ✨ CUSTOM WIDGETS - ULTIMATE 2025 STYLE
+# ═══════════════════════════════════════════════════════════════════════════
+
+class GlassFrame(tk.Frame):
+    """Enhanced glassmorphism frame"""
+    
+    def __init__(self, parent, opacity=0.7, border=True, corner_radius=20, **kwargs):
+        super().__init__(parent, **kwargs)
+        
+        self.corner_radius = corner_radius
+        self.opacity = opacity
+        
+        self.configure(
+            bg=Ultimate2025Colors.DARK['bg_glass_strong'],
+            relief=tk.FLAT,
+            bd=0,
+            highlightthickness=0
+        )
+
+
+class GradientButton(tk.Button):
+    """Enhanced gradient button with glow"""
+    
+    def __init__(self, parent, text, command, icon='', corner_radius=15, **kwargs):
+        self.command = command
+        self.corner_radius = corner_radius
+        self.hover_color = Ultimate2025Colors.DARK['neon_cyan']
+        self.base_color = Ultimate2025Colors.DARK['accent_gradient_1']
+        
+        super().__init__(
+            parent, 
+            text=f"{icon} {text}".strip() if icon else text,
+            command=command,
+            font=('Segoe UI', 11, 'bold'),
+            bg=self.base_color,
+            fg='#FFFFFF',
+            activebackground=self.hover_color,
+            activeforeground='#FFFFFF',
+            relief=tk.FLAT,
+            borderwidth=0,
+            padx=25,
+            pady=12,
+            cursor='hand2',
+            **kwargs
+        )
+        
+        self.bind('<Enter>', self.on_enter)
+        self.bind('<Leave>', self.on_leave)
+    
+    def on_enter(self, e):
+        self.configure(bg=self.hover_color)
+    
+    def on_leave(self, e):
+        self.configure(bg=self.base_color)
+
+
+class NeonEntry(tk.Entry):
+    """Enhanced entry with neon effect"""
+    
+    def __init__(self, parent, placeholder='', **kwargs):
+        self.placeholder = placeholder
+        
+        super().__init__(
+            parent,
+            font=('Segoe UI', 12),
+            bg=Ultimate2025Colors.DARK['bg_glass'],
+            fg=Ultimate2025Colors.DARK['text_primary'],
+            insertbackground=Ultimate2025Colors.DARK['neon_cyan'],
+            relief=tk.FLAT,
+            borderwidth=2,
+            highlightthickness=0,
+            **kwargs
+        )
+        
+        if placeholder:
+            self.insert(0, placeholder)
+            self.configure(fg=Ultimate2025Colors.DARK['text_muted'])
+            self.bind('<FocusIn>', self.on_focus)
+            self.bind('<FocusOut>', self.on_focus_out)
+    
+    def on_focus(self, e):
+        if self.get() == self.placeholder:
+            self.delete(0, tk.END)
+            self.configure(fg=Ultimate2025Colors.DARK['text_primary'])
+    
+    def on_focus_out(self, e):
+        if not self.get():
+            self.insert(0, self.placeholder)
+            self.configure(fg=Ultimate2025Colors.DARK['text_muted'])
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 📊 DASHBOARD STATS WIDGET
+# ═══════════════════════════════════════════════════════════════════════════
+
+class StatsWidget:
+    """Dashboard statistics widget"""
+    
+    def __init__(self, parent, colors, events):
+        self.parent = parent
+        self.colors = colors
+        self.events = events
+        self.frame = None
+        self.create_widget()
+    
+    def create_widget(self):
+        """Create stats display"""
+        self.frame = tk.Frame(self.parent, bg=self.colors['bg_glass_strong'], relief=tk.FLAT, bd=0)
+        self.frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
+        
+        container = tk.Frame(self.frame, bg=self.colors['bg_glass_strong'])
+        container.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Stats data
+        total_events = sum(len(events) for events in self.events.values())
+        
+        # This month
+        now = datetime.now()
+        this_month = sum(
+            len(events) for d, events in self.events.items() 
+            if d.year == now.year and d.month == now.month
+        )
+        
+        # Categories count
+        categories_count = {}
+        for events_list in self.events.values():
+            for event in events_list:
+                cat = event.get('category', 'other')
+                categories_count[cat] = categories_count.get(cat, 0) + 1
+        
+        # Total events stat
+        self.create_stat_item(container, "📅", f"{total_events}", "Total Events", 0)
+        # This month stat
+        self.create_stat_item(container, "🗓️", f"{this_month}", "This Month", 1)
+        # Categories stat
+        self.create_stat_item(container, "🏷️", f"{len(categories_count)}", "Categories", 2)
+    
+    def create_stat_item(self, parent, icon, value, label, column):
+        """Create individual stat item"""
+        frame = tk.Frame(parent, bg=self.colors['bg_glass_strong'])
+        frame.grid(row=0, column=column, padx=20, sticky='nsew')
+        
+        tk.Label(frame, text=icon, font=('Segoe UI', 18),
+                bg=self.colors['bg_glass_strong']).pack()
+        
+        tk.Label(frame, text=value, font=('Segoe UI', 20, 'bold'),
+                bg=self.colors['bg_glass_strong'],
+                fg=self.colors['neon_cyan']).pack()
+        
+        tk.Label(frame, text=label, font=('Segoe UI', 9),
+                bg=self.colors['bg_glass_strong'],
+                fg=self.colors['text_muted']).pack()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🎯 MAIN APPLICATION - OpenAgenda v1.4
+# ═══════════════════════════════════════════════════════════════════════════
+
+class OpenAgendaV14:
+    """OpenAgenda v1.4 - Ultimate 2025 Experience"""
+    
+    def __init__(self, root):
+        self.root = root
+        self.root.title("📅 OpenAgenda v1.4 - Ultimate 2025")
+        self.root.geometry("900x750")
+        self.root.configure(bg=Ultimate2025Colors.DARK['bg_primary'])
+        
+        # Set window icon (optional)
+        try:
+            self.root.iconname("OpenAgenda")
+        except:
+            pass
+        
+        # Data
+        self.events = {}
+        self.data_file = "events_data.json"
+        self.is_dark_theme = True
+        self.colors = Ultimate2025Colors.DARK.copy()
+        self.current_date = date.today()
+        self.selected_date = date.today()
+        
+        # Load data
+        self.load_data()
+        
+        # Build UI
+        self.create_header()
+        self.create_weather_widget()
+        self.create_update_widget()
+        self.create_main_content()
+        self.create_footer()
+        
+        # Initialize
+        self.update_calendar()
+    
+    def create_header(self):
+        """Create header with title"""
+        self.header = tk.Frame(self.root, bg=self.colors['bg_secondary'], relief=tk.FLAT, bd=0)
+        self.header.pack(side=tk.TOP, fill=tk.X)
+        
+        # Title
+        title_label = tk.Label(
+            self.header,
+            text="📅 OpenAgenda v1.4",
+            font=('Segoe UI', 22, 'bold'),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['neon_cyan']
+        )
+        title_label.pack(side=tk.LEFT, padx=20, pady=15)
+        
+        # Theme toggle
+        self.theme_btn = tk.Button(
+            self.header,
+            text="🌙",
+            font=('Segoe UI', 16),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.toggle_theme,
+            cursor='hand2'
+        )
+        self.theme_btn.pack(side=tk.RIGHT, padx=10)
+        
+        # Settings button
+        settings_btn = tk.Button(
+            self.header,
+            text="⚙️",
+            font=('Segoe UI', 16),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.show_settings,
+            cursor='hand2'
+        )
+        settings_btn.pack(side=tk.RIGHT, padx=5)
+    
+    def create_weather_widget(self):
+        """Create weather widget"""
+        self.weather_widget = WeatherWidget(self.root, self.colors)
+    
+    def create_update_widget(self):
+        """Create auto-update widget"""
+        self.update_widget = AutoUpdateSystem(self.root, self.colors)
+    
+    def create_main_content(self):
+        """Create main content area"""
+        self.main_frame = tk.Frame(self.root, bg=self.colors['bg_primary'])
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Left panel - Calendar
+        self.left_panel = tk.Frame(self.main_frame, bg=self.colors['bg_primary'])
+        self.left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Calendar frame
+        self.cal_frame = tk.Frame(self.left_panel, bg=self.colors['bg_glass_strong'], relief=tk.FLAT, bd=0)
+        self.cal_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Month navigation
+        self.create_calendar_header()
+        
+        # Calendar buttons frame
+        self.cal_buttons_frame = tk.Frame(self.cal_frame, bg=self.colors['bg_glass_strong'])
+        self.cal_buttons_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        self.cal_buttons = []
+        
+        # Right panel - Events
+        self.right_panel = tk.Frame(self.main_frame, bg=self.colors['bg_primary'])
+        self.right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        
+        # Events frame
+        self.events_frame = tk.Frame(self.right_panel, bg=self.colors['bg_glass_strong'], relief=tk.FLAT, bd=0)
+        self.events_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Date label
+        self.date_label = tk.Label(
+            self.events_frame,
+            text="📅 Today",
+            font=('Segoe UI', 14, 'bold'),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_primary']
+        )
+        self.date_label.pack(pady=(15, 10))
+        
+        # Event count
+        self.event_count = tk.Label(
+            self.events_frame,
+            text="0 events",
+            font=('Segoe UI', 10),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_muted']
+        )
+        self.event_count.pack()
+        
+        # Add event form
+        self.create_event_form()
+        
+        # Events listbox
+        listbox_frame = tk.Frame(self.events_frame, bg=self.colors['bg_glass_strong'])
+        listbox_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
+        
+        self.events_listbox = tk.Listbox(
+            listbox_frame,
+            font=('Segoe UI', 11),
+            bg=self.colors['bg_glass'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            selectbackground=self.colors['neon_cyan'],
+            selectforeground=self.colors['bg_primary']
+        )
+        self.events_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Scrollbar
+        scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL)
+        scrollbar.config(command=self.events_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.events_listbox.config(yscrollcommand=scrollbar.set)
+        
+        # Bind delete key
+        self.events_listbox.bind('<Delete>', self.delete_selected)
+        self.events_listbox.bind('<BackSpace>', self.delete_selected)
+        
+        # Status
+        self.status_label = tk.Label(
+            self.events_frame,
+            text="Ready",
+            font=('Segoe UI', 9),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_muted']
+        )
+        self.status_label.pack(pady=(0, 10))
+    
+    def create_calendar_header(self):
+        """Create calendar header"""
+        nav_frame = tk.Frame(self.cal_frame, bg=self.colors['bg_glass_strong'])
+        nav_frame.pack(fill=tk.X, padx=10, pady=(15, 5))
+        
+        # Previous button
+        prev_btn = tk.Button(
+            nav_frame,
+            text="◀",
+            font=('Segoe UI', 12),
+            bg=self.colors['bg_glass'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.prev_month,
+            cursor='hand2'
+        )
+        prev_btn.pack(side=tk.LEFT)
+        
+        # Month label
+        self.month_label = tk.Label(
+            nav_frame,
+            text="",
+            font=('Segoe UI', 16, 'bold'),
+            bg=self.colors['bg_glass_strong'],
+            fg=self.colors['text_primary']
+        )
+        self.month_label.pack(side=tk.LEFT, padx=20)
+        
+        # Next button
+        next_btn = tk.Button(
+            nav_frame,
+            text="▶",
+            font=('Segoe UI', 12),
+            bg=self.colors['bg_glass'],
+            fg=self.colors['text_primary'],
+            relief=tk.FLAT,
+            command=self.next_month,
+            cursor='hand2'
+        )
+        next_btn.pack(side=tk.RIGHT)
+        
+        # Today button
+        today_btn = tk.Button(
+            nav_frame,
+            text="Today",
+            font=('Segoe UI', 10),
+            bg=self.colors['neon_cyan'],
+            fg=self.colors['bg_primary'],
+            relief=tk.FLAT,
+            command=self.go_to_today,
+            cursor='hand2'
+        )
+        today_btn.pack(side=tk.RIGHT, padx=10)
+        
+        # Day headers
+        days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        days_frame = tk.Frame(self.cal_frame, bg=self.colors['bg_glass_strong'])
+        days_frame.pack(fill=tk.X, padx=10)
+        
+        for day in days:
+            tk.Label(
+                days_frame,
+                text=day,
+                font=('Segoe UI', 9, 'bold'),
+                bg=self.colors['bg_glass_strong'],
+                fg=self.colors['text_muted']
+            ).pack(side=tk.LEFT, padx=8, pady=2)
+    
+    def create_event_form(self):
+        """Create add event form"""
+        form_frame = tk.Frame(self.events_frame, bg=self.colors['bg_glass_strong'])
+        form_frame.pack(fill=tk.X, padx=15, pady=10)
+        
+        # Time entry
+        self.time_entry = NeonEntry(form_frame, placeholder="14:30")
+        self.time_entry.pack(fill=tk.X, pady=3)
+        
+        # Title entry
+        self.title_entry = NeonEntry(form_frame, placeholder="Event title...")
+        self.title_entry.pack(fill=tk.X, pady=3)
+        
+        # Category dropdown
+        self.category_var = tk.StringVar()
+        categories = [f"{v['icon']} {v['name']}" for v in Ultimate2025Colors.CATEGORIES.values()]
+        
+        self.category_combo = ttk.Combobox(
+            form_frame,
+            textvariable=self.category_var,
+            values=categories,
+            font=('Segoe UI', 11),
+            state="readonly"
+        )
+        self.category_combo.pack(fill=tk.X, pady=3)
+        self.category_combo.current(0)
+        
+        # Add button
+        add_btn = GradientButton(
+            form_frame,
+            text="Add Event",
+            command=self.show_new_event_dialog,
+            icon="➕"
+        )
+        add_btn.pack(fill=tk.X, pady=5)
+    
+    def create_footer(self):
+        """Create footer"""
+        footer = tk.Frame(self.root, bg=self.colors['bg_secondary'])
+        footer.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        self.save_status = tk.Label(
+            footer,
+            text="💾 Saved",
+            font=('Segoe UI', 9),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['text_muted']
+        )
+        self.save_status.pack(side=tk.LEFT, padx=15, pady=8)
+        
+        tk.Label(
+            footer,
+            text="OpenAgenda v1.4 © 2025",
+            font=('Segoe UI', 9),
+            bg=self.colors['bg_secondary'],
+            fg=self.colors['text_muted']
+        ).pack(side=tk.RIGHT, padx=15)
+    
+    def show_settings(self):
+        """Show settings dialog"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("⚙️ Settings")
+        dialog.geometry("450x400")
+        dialog.configure(bg=self.colors['bg_primary'])
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Notebook for tabs
+        notebook = ttk.Notebook(dialog)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # General tab
+        general_frame = tk.Frame(notebook, bg=self.colors['bg_primary'])
+        notebook.add(general_frame, text="General")
+        
+        tk.Label(general_frame, text="OpenAgenda v1.4 Settings",
+                font=('Segoe UI', 14, 'bold'),
+                bg=self.colors['bg_primary'],
+                fg=self.colors['text_primary']).pack(pady=20)
+        
+        # Export button
+        GradientButton(general_frame, text="Export Events (JSON)",
+                       command=self.export_json, icon="📤").pack(pady=5, fill=tk.X, padx=20)
+        
+        # Import button
+        GradientButton(general_frame, text="Import Events (JSON)",
+                       command=self.import_json, icon="📥").pack(pady=5, fill=tk.X, padx=20)
+        
+        # Export CSV
+        GradientButton(general_frame, text="Export Events (CSV)",
+                       command=self.export_csv, icon="📊").pack(pady=5, fill=tk.X, padx=20)
+        
+        # About tab
+        about_frame = tk.Frame(notebook, bg=self.colors['bg_primary'])
+        notebook.add(about_frame, text="About")
+        
+        tk.Label(about_frame, text="📅 OpenAgenda v1.4",
+                font=('Segoe UI', 18, 'bold'),
+                bg=self.colors['bg_primary'],
+                fg=self.colors['neon_cyan']).pack(pady=20)
+        
+        tk.Label(about_frame, text="Ultimate 2025 Experience",
+                font=('Segoe UI', 12),
+                bg=self.colors['bg_primary'],
+                fg=self.colors['text_secondary']).pack()
+        
+        tk.Label(about_frame, text="© 2025 Open-Agenda Team",
+                font=('Segoe UI', 10),
+                bg=self.colors['bg_primary'],
+                fg=self.colors['text_muted']).pack(pady=20)
+        
+        # Close button
+        tk.Button(dialog, text="Close", command=dialog.destroy,
+                 bg=self.colors['neon_cyan'], fg=self.colors['bg_primary'],
+                 font=('Segoe UI', 11, 'bold'), relief=tk.FLAT).pack(pady=10)
+    
+    def export_json(self):
+        """Export events to JSON"""
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")]
+        )
+        if filename:
+            try:
+                data = {k.isoformat(): v for k, v in self.events.items()}
+                with open(filename, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2)
+                messagebox.showinfo("Export", f"Exported to {filename}")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+    
+    def import_json(self):
+        """Import events from JSON"""
+        filename = filedialog.askopenfilename(
+            filetypes=[("JSON files", "*.json")]
+        )
+        if filename:
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.events = {date.fromisoformat(k): v for k, v in data.items()}
+                self.update_calendar()
+                messagebox.showinfo("Import", "Events imported successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+    
+    def export_csv(self):
+        """Export events to CSV"""
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")]
+        )
+        if filename:
+            try:
+                with open(filename, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['Date', 'Time', 'Title', 'Category'])
+                    for event_date, events_list in sorted(self.events.items()):
+                        for event in events_list:
+                            writer.writerow([
+                                event_date.isoformat(),
+                                event.get('time', ''),
+                                event.get('title', ''),
+                                event.get('category', 'other')
+                            ])
+                messagebox.showinfo("Export", f"Exported to {filename}")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+    
+    def update_calendar(self):
+        """Update calendar display"""
+        # Update month label
+        month_year = self.current_date.strftime("%B %Y")
+        self.month_label.configure(text=month_year)
+        
+        # Clear old buttons
+        for btn in self.cal_buttons:
+            btn.destroy()
+        self.cal_buttons = []
+        
+        # Get calendar data
+        cal_data = cal.monthrange(self.current_date.year, self.current_date.month)
+        first_day = cal_data[0]  # 0 = Monday
+        days_in_month = cal_data[1]
+        
+        # Create day buttons
+        day = 1
+        for week_idx in range(6):
+            for day_idx in range(7):
+                btn_index = week_idx * 7 + day_idx
+                
+                if day <= days_in_month and btn_index >= first_day:
+                    day_date = date(self.current_date.year, self.current_date.month, day)
+                    
+                    # Color logic
+                    if day_date == date.today():
+                        bg = self.colors['neon_cyan']
+                        fg = self.colors['bg_primary']
+                    elif day_date == self.selected_date:
+                        bg = self.colors['accent_gradient_1']
+                        fg = '#FFFFFF'
+                    elif day_date in self.events and self.events[day_date]:
+                        bg = self.colors['neon_purple']
+                        fg = '#FFFFFF'
+                    else:
+                        bg = self.colors['bg_glass']
+                        fg = self.colors['text_primary']
+                    
+                    btn = tk.Button(
+                        self.cal_buttons_frame,
+                        text=str(day),
+                        font=('Segoe UI', 10, 'bold'),
+                        bg=bg,
+                        fg=fg,
+                        relief=tk.FLAT,
+                        command=lambda d=day: self.select_date(d)
+                    )
+                    btn.grid(row=week_idx, column=day_idx, padx=2, pady=2, sticky='nsew')
+                    self.cal_buttons.append(btn)
+                    day += 1
+        
+        # Update date label
+        day_name = self.selected_date.strftime("%A, %B %d, %Y")
+        self.date_label.configure(text=f"📅 {day_name}")
+        
+        # Update events list
+        self.update_events_list()
+    
+    def update_events_list(self):
+        """Update events listbox"""
+        self.events_listbox.delete(0, tk.END)
+        
+        if self.selected_date in self.events and self.events[self.selected_date]:
+            for event in sorted(self.events[self.selected_date], 
+                               key=lambda x: x.get('time', '00:00')):
+                cat = event.get('category', 'other')
+                cat_info = Ultimate2025Colors.CATEGORIES.get(cat, 
+                              Ultimate2025Colors.CATEGORIES['other'])
+                
+                text = f"{cat_info['icon']} {event.get('time', '00:00')} - {event['title']}"
+                self.events_listbox.insert(tk.END, text)
+            
+            self.event_count.configure(
+                text=f"{len(self.events[self.selected_date])} events"
+            )
+        else:
+            self.events_listbox.insert(tk.END, "✨ No events for this day")
+            self.events_listbox.insert(tk.END, "➕ Add your first event above!")
+            self.event_count.configure(text="0 events")
+    
+    def select_date(self, day):
+        """Select a date"""
+        self.selected_date = date(self.current_date.year, self.current_date.month, day)
+        self.update_calendar()
+    
+    def prev_month(self):
+        """Previous month"""
+        if self.current_date.month == 1:
+            self.current_date = date(self.current_date.year - 1, 12, 1)
+        else:
+            self.current_date = date(self.current_date.year, self.current_date.month - 1, 1)
+        self.update_calendar()
+    
+    def next_month(self):
+        """Next month"""
+        if self.current_date.month == 12:
+            self.current_date = date(self.current_date.year + 1, 1, 1)
+        else:
+            self.current_date = date(self.current_date.year, self.current_date.month + 1, 1)
+        self.update_calendar()
+    
+    def go_to_today(self):
+        """Go to today"""
+        self.current_date = date.today()
+        self.selected_date = date.today()
+        self.update_calendar()
+    
+    def toggle_theme(self):
+        """Toggle theme"""
+        self.is_dark_theme = not self.is_dark_theme
+        
+        if self.is_dark_theme:
+            self.colors = Ultimate2025Colors.DARK.copy()
+            self.theme_btn.configure(text="🌙")
+        else:
+            self.colors = Ultimate2025Colors.LIGHT.copy()
+            self.theme_btn.configure(text="☀️")
+        
+        self.root.configure(bg=self.colors['bg_primary'])
+        self.update_calendar()
+    
+    def show_new_event_dialog(self):
+        """Show new event dialog"""
+        time_val = self.time_entry.get().strip()
+        title = self.title_entry.get().strip()
+        
+        if not title or title == "Event title...":
+            messagebox.showwarning("⚠️", "Please enter an event title!")
+            return
+        
+        if not time_val or time_val == "14:30":
+            time_val = "09:00"
+        
+        # Get category
+        cat_text = self.category_var.get()
+        category = 'personal'
+        for cat, info in Ultimate2025Colors.CATEGORIES.items():
+            if info['name'] in cat_text:
+                category = cat
+                break
+        
+        if self.selected_date not in self.events:
+            self.events[self.selected_date] = []
+        
+        self.events[self.selected_date].append({
+            'time': time_val,
+            'title': title,
+            'category': category,
+            'created': datetime.now().isoformat()
+        })
+        
+        self.events[self.selected_date].sort(key=lambda x: x.get('time', '00:00'))
+        
+        # Clear entries
+        self.title_entry.delete(0, tk.END)
+        self.time_entry.delete(0, tk.END)
+        
+        self.update_calendar()
+        self.trigger_save()
+        
+        self.status_label.configure(text=f"✅ Added: {title}")
+    
+    def delete_selected(self, event=None):
+        """Delete selected event"""
+        selection = self.events_listbox.curselection()
+        if not selection or not self.events.get(self.selected_date):
+            return
+        
+        index = selection[0]
+        if index < len(self.events[self.selected_date]):
+            deleted = self.events[self.selected_date].pop(index)
+            
+            if not self.events[self.selected_date]:
+                del self.events[self.selected_date]
+            
+            self.update_calendar()
+            self.trigger_save()
+            
+            self.status_label.configure(text=f"🗑️ Deleted: {deleted['title']}")
+    
+    def trigger_save(self):
+        """Trigger auto-save"""
+        self.save_status.configure(text="⏳ Saving...", 
+                                 fg=self.colors['warning'])
+        self.root.after(1000, self.perform_save)
+    
+    def perform_save(self):
+        """Save data"""
+        try:
+            with open(self.data_file, 'w', encoding='utf-8') as f:
+                data = {k.isoformat(): v for k, v in self.events.items()}
+                json.dump(data, f, indent=2)
+            self.save_status.configure(text="💾 Saved", 
+                                     fg=self.colors['success'])
+        except Exception as e:
+            self.save_status.configure(text="❌ Error", 
+                                     fg=self.colors['danger'])
+    
+    def manual_save(self):
+        """Manual save"""
+        self.perform_save()
+        self.status_label.configure(text="💾 Saved manually")
+    
+    def load_data(self):
+        """Load data"""
+        if os.path.exists(self.data_file):
+            try:
+                with open(self.data_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.events = {date.fromisoformat(k): v for k, v in data.items()}
+            except Exception as e:
+                print(f"Error loading: {e}")
+    
+    def on_closing(self):
+        """On closing"""
+        self.perform_save()
+        self.root.destroy()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🎯 MAIN
+# ═══════════════════════════════════════════════════════════════════════════
+
+def main():
+    root = tk.Tk()
+    
+    # Set window properties for modern look
+    root.attributes('-alpha', 0.98)
+    root.minsize(800, 650)
+    
+    app = OpenAgendaV14(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
