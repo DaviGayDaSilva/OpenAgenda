@@ -4,143 +4,197 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import okhttp3.*
-import java.io.File
-import java.util.*
-import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    private val client = OkHttpClient()
-    private val gson = Gson()
-    private val API_KEY = "cc4577b215b574d3700c5be607a104c1"
-    
-    private var events: MutableList<Event> = mutableListOf()
     private var currentScreen = "home"
-
-    data class Event(val title: String, val date: String, val time: String, val desc: String)
-    data class WeatherResponse(val main: Main, val weather: List<WeatherDesc>)
-    data class Main(val temp: Double)
-    data class WeatherDesc(val description: String)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Load events first
-        try {
-            val file = File(filesDir, "events.json")
-            if (file.exists()) {
-                val json = file.readText()
-                val type = object : TypeToken<MutableList<Event>>() {}.type
-                events = gson.fromJson(json, type) ?: mutableListOf()
-            }
-        } catch (e: Exception) {
-            events = mutableListOf()
-        }
-        
         showHome()
     }
 
     private fun showHome() {
         currentScreen = "home"
-        setContentView(R.layout.home)
         
-        // Update event count
-        val countText = findViewById<TextView>(R.id.eventCount)
-        if (countText != null) {
-            countText.text = "📅 ${events.size} eventos"
-        }
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 100, 50, 50)
+        layout.setBackgroundColor(0xFF0D0D1A.toInt())
         
-        // Fetch weather
-        val weatherText = findViewById<TextView>(R.id.weatherText)
-        weatherText?.text = "🌤️ Carregando..."
+        val title = TextView(this)
+        title.text = "OpenAgenda v1.4"
+        title.textSize = 24f
+        title.setTextColor(0xFFFFFFFF.toInt())
+        title.gravity = android.view.Gravity.CENTER
         
-        thread {
-            try {
-                val request = Request.Builder()
-                    .url("https://api.openweathermap.org/data/2.5/weather?q=SaoPaulo&appid=$API_KEY&units=metric")
-                    .build()
-                
-                client.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val body = response.body?.string()
-                        val weather = gson.fromJson(body, WeatherResponse::class.java)
-                        runOnUiThread {
-                            val wt = findViewById<TextView>(R.id.weatherText)
-                            if (weather.weather.isNotEmpty()) {
-                                wt?.text = "🌤️ ${weather.main.temp.toInt()}°C - ${weather.weather[0].description.replaceFirstChar { it.uppercase() }}"
-                            } else {
-                                wt?.text = "🌤️ ${weather.main.temp.toInt()}°C"
-                            }
-                        }
-                    } else {
-                        runOnUiThread {
-                            findViewById<TextView>(R.id.weatherText)?.text = "🌤️ --°C"
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                runOnUiThread {
-                    findViewById<TextView>(R.id.weatherText)?.text = "🌤️ Erro"
-                }
-            }
-        }
+        val weather = TextView(this)
+        weather.text = "🌤️ São Paulo: 25°C"
+        weather.textSize = 18f
+        weather.setTextColor(0xFFFFFFFF.toInt())
+        weather.gravity = android.view.Gravity.CENTER
+        weather.setPadding(0, 30, 0, 30)
+        
+        val events = TextView(this)
+        events.text = "📅 0 eventos"
+        events.textSize = 18f
+        events.setTextColor(0xFFFFFFFF.toInt())
+        events.gravity = android.view.Gravity.CENTER
+        
+        val btnAdd = Button(this)
+        btnAdd.text = "➕ Adicionar Evento"
+        btnAdd.setBackgroundColor(0xFF4D7CFF.toInt())
+        btnAdd.setTextColor(0xFFFFFFFF.toInt())
+        btnAdd.setPadding(20, 30, 20, 30)
+        btnAdd.setOnClickListener { showAddEvent() }
+        
+        val btnList = Button(this)
+        btnList.text = "📋 Ver Eventos"
+        btnList.setBackgroundColor(0xFF33CCBB.toInt())
+        btnList.setTextColor(0xFFFFFFFF.toInt())
+        btnList.setPadding(20, 30, 20, 30)
+        btnList.setOnClickListener { showEventList() }
+        
+        val btnSettings = Button(this)
+        btnSettings.text = "⚙️ Configurações"
+        btnSettings.setBackgroundColor(0xFFFF7F50.toInt())
+        btnSettings.setTextColor(0xFFFFFFFF.toInt())
+        btnSettings.setPadding(20, 30, 20, 30)
+        btnSettings.setOnClickListener { showSettings() }
+        
+        layout.addView(title)
+        layout.addView(weather)
+        layout.addView(events)
+        layout.addView(btnAdd)
+        layout.addView(btnList)
+        layout.addView(btnSettings)
+        
+        setContentView(layout)
     }
 
-    fun goToAddEvent(view: View) {
+    private fun showAddEvent() {
         currentScreen = "add"
-        setContentView(R.layout.add_event)
+        
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 50, 50, 50)
+        layout.setBackgroundColor(0xFF0D0D1A.toInt())
+        
+        val titleLabel = TextView(this)
+        titleLabel.text = "Novo Evento"
+        titleLabel.textSize = 22f
+        titleLabel.setTextColor(0xFFFFFFFF.toInt())
+        titleLabel.gravity = android.view.Gravity.CENTER
+        
+        val inputTitle = EditText(this)
+        inputTitle.hint = "Título"
+        inputTitle.setTextColor(0xFFFFFFFF.toInt())
+        inputTitle.setHintTextColor(0x80FFFFFF.toInt())
+        
+        val inputDate = EditText(this)
+        inputDate.hint = "Data (ex: 19/03/2026)"
+        inputDate.setTextColor(0xFFFFFFFF.toInt())
+        inputDate.setHintTextColor(0x80FFFFFF.toInt())
+        
+        val inputTime = EditText(this)
+        inputTime.hint = "Hora (ex: 14:00)"
+        inputTime.setTextColor(0xFFFFFFFF.toInt())
+        inputTime.setHintTextColor(0x80FFFFFF.toInt())
+        
+        val inputDesc = EditText(this)
+        inputDesc.hint = "Descrição"
+        inputDesc.setTextColor(0xFFFFFFFF.toInt())
+        inputDesc.setHintTextColor(0x80FFFFFF.toInt())
+        inputDesc.minLines = 3
+        
+        val btnSave = Button(this)
+        btnSave.text = "💾 Salvar"
+        btnSave.setBackgroundColor(0xFF4D7CFF.toInt())
+        btnSave.setTextColor(0xFFFFFFFF.toInt())
+        
+        val btnBack = Button(this)
+        btnBack.text = "⬅️ Voltar"
+        btnBack.setBackgroundColor(0xFF666666.toInt())
+        btnBack.setTextColor(0xFFFFFFFF.toInt())
+        btnBack.setOnClickListener { showHome() }
+        
+        layout.addView(titleLabel)
+        layout.addView(inputTitle)
+        layout.addView(inputDate)
+        layout.addView(inputTime)
+        layout.addView(inputDesc)
+        layout.addView(btnSave)
+        layout.addView(btnBack)
+        
+        setContentView(layout)
     }
 
-    fun goToEventList(view: View) {
+    private fun showEventList() {
         currentScreen = "list"
-        setContentView(R.layout.event_list)
         
-        val listView = findViewById<ListView>(R.id.eventsList)
-        if (events.isEmpty()) {
-            listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, arrayOf("Nenhum evento"))
-        } else {
-            val eventStrings = events.map { "${it.date} - ${it.title}" }.toTypedArray()
-            listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, eventStrings)
-        }
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 50, 50, 50)
+        layout.setBackgroundColor(0xFF0D0D1A.toInt())
+        
+        val title = TextView(this)
+        title.text = "Meus Eventos"
+        title.textSize = 22f
+        title.setTextColor(0xFFFFFFFF.toInt())
+        title.gravity = android.view.Gravity.CENTER
+        
+        val empty = TextView(this)
+        empty.text = "Nenhum evento cadastrado"
+        empty.textSize = 16f
+        empty.setTextColor(0x80FFFFFF.toInt())
+        empty.gravity = android.view.Gravity.CENTER
+        
+        val btnBack = Button(this)
+        btnBack.text = "⬅️ Voltar"
+        btnBack.setBackgroundColor(0xFF666666.toInt())
+        btnBack.setTextColor(0xFFFFFFFF.toInt())
+        btnBack.setOnClickListener { showHome() }
+        
+        layout.addView(title)
+        layout.addView(empty)
+        layout.addView(btnBack)
+        
+        setContentView(layout)
     }
 
-    fun goToSettings(view: View) {
+    private fun showSettings() {
         currentScreen = "settings"
-        setContentView(R.layout.settings)
-    }
-
-    fun saveEvent(view: View) {
-        val titleInput = findViewById<EditText>(R.id.titleInput)
-        val dateInput = findViewById<EditText>(R.id.dateInput)
-        val timeInput = findViewById<EditText>(R.id.timeInput)
-        val descInput = findViewById<EditText>(R.id.descInput)
         
-        val title = titleInput?.text.toString()
-        val date = dateInput?.text.toString()
-        val time = timeInput?.text.toString()
-        val desc = descInput?.text.toString()
-
-        if (title.isNotEmpty() && date.isNotEmpty()) {
-            events.add(Event(title, date, time, desc))
-            
-            // Save to file
-            try {
-                val json = gson.toJson(events)
-                File(filesDir, "events.json").writeText(json)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            
-            Toast.makeText(this, "Evento salvo!", Toast.LENGTH_SHORT).show()
-            showHome()
-        } else {
-            Toast.makeText(this, "Preencha título e data!", Toast.LENGTH_SHORT).show()
-        }
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 50, 50, 50)
+        layout.setBackgroundColor(0xFF0D0D1A.toInt())
+        
+        val title = TextView(this)
+        title.text = "Configurações"
+        title.textSize = 22f
+        title.setTextColor(0xFFFFFFFF.toInt())
+        title.gravity = android.view.Gravity.CENTER
+        
+        val version = TextView(this)
+        version.text = "OpenAgenda v1.4"
+        version.textSize = 14f
+        version.setTextColor(0x80FFFFFF.toInt())
+        version.gravity = android.view.Gravity.CENTER
+        
+        val btnBack = Button(this)
+        btnBack.text = "⬅️ Voltar"
+        btnBack.setBackgroundColor(0xFF666666.toInt())
+        btnBack.setTextColor(0xFFFFFFFF.toInt())
+        btnBack.setOnClickListener { showHome() }
+        
+        layout.addView(title)
+        layout.addView(version)
+        layout.addView(btnBack)
+        
+        setContentView(layout)
     }
-
+    
     fun goHome(view: View) {
         showHome()
     }
