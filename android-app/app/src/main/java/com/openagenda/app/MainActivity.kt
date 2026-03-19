@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
@@ -18,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     private val gson = Gson()
     private val API_KEY = "cc4577b215b574d3700c5be607a104c1"
     
-    private lateinit var events: MutableList<Event>
+    private var events: MutableList<Event> = mutableListOf()
     private var currentScreen = "home"
 
     data class Event(val title: String, val date: String, val time: String, val desc: String)
@@ -28,46 +27,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Load events first
         try {
-            loadEvents()
-            showHome()
+            val file = File(filesDir, "events.json")
+            if (file.exists()) {
+                val json = file.readText()
+                val type = object : TypeToken<MutableList<Event>>() {}.type
+                events = gson.fromJson(json, type) ?: mutableListOf()
+            }
         } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Erro ao iniciar: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun getDataFile(): File {
-        val dir = File(filesDir, "data")
-        if (!dir.exists()) dir.mkdirs()
-        return File(dir, "events.json")
-    }
-
-    private fun loadEvents() {
-        val file = getDataFile()
-        if (file.exists()) {
-            val json = file.readText()
-            val type = object : TypeToken<MutableList<Event>>() {}.type
-            events = gson.fromJson(json, type) ?: mutableListOf()
-        } else {
             events = mutableListOf()
         }
-    }
-
-    private fun saveEvents() {
-        val json = gson.toJson(events)
-        getDataFile().writeText(json)
+        
+        showHome()
     }
 
     private fun showHome() {
         currentScreen = "home"
         setContentView(R.layout.home)
         
-        findViewById<TextView>(R.id.eventCount).text = "📅 ${events.size} eventos"
-        fetchWeather()
-    }
-
-    private fun fetchWeather() {
+        // Update event count
+        val countText = findViewById<TextView>(R.id.eventCount)
+        if (countText != null) {
+            countText.text = "📅 ${events.size} eventos"
+        }
+        
+        // Fetch weather
+        val weatherText = findViewById<TextView>(R.id.weatherText)
+        weatherText?.text = "🌤️ Carregando..."
+        
         thread {
             try {
                 val request = Request.Builder()
@@ -76,16 +65,25 @@ class MainActivity : AppCompatActivity() {
                 
                 client.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
-                        val weather = gson.fromJson(response.body?.string(), WeatherResponse::class.java)
+                        val body = response.body?.string()
+                        val weather = gson.fromJson(body, WeatherResponse::class.java)
                         runOnUiThread {
-                            findViewById<TextView>(R.id.weatherText).text = 
-                                "🌤️ ${weather.main.temp.toInt()}°C - ${weather.weather[0].description.replaceFirstChar { it.uppercase() }}"
+                            val wt = findViewById<TextView>(R.id.weatherText)
+                            if (weather.weather.isNotEmpty()) {
+                                wt?.text = "🌤️ ${weather.main.temp.toInt()}°C - ${weather.weather[0].description.replaceFirstChar { it.uppercase() }}"
+                            } else {
+                                wt?.text = "🌤️ ${weather.main.temp.toInt()}°C"
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            findViewById<TextView>(R.id.weatherText)?.text = "🌤️ --°C"
                         }
                     }
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    findViewById<TextView>(R.id.weatherText).text = "🌤️ --°C"
+                    findViewById<TextView>(R.id.weatherText)?.text = "🌤️ Erro"
                 }
             }
         }
@@ -115,14 +113,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun saveEvent(view: View) {
-        val title = findViewById<EditText>(R.id.titleInput).text.toString()
-        val date = findViewById<EditText>(R.id.dateInput).text.toString()
-        val time = findViewById<EditText>(R.id.timeInput).text.toString()
-        val desc = findViewById<EditText>(R.id.descInput).text.toString()
+        val titleInput = findViewById<EditText>(R.id.titleInput)
+        val dateInput = findViewById<EditText>(R.id.dateInput)
+        val timeInput = findViewById<EditText>(R.id.timeInput)
+        val descInput = findViewById<EditText>(R.id.descInput)
+        
+        val title = titleInput?.text.toString()
+        val date = dateInput?.text.toString()
+        val time = timeInput?.text.toString()
+        val desc = descInput?.text.toString()
 
         if (title.isNotEmpty() && date.isNotEmpty()) {
             events.add(Event(title, date, time, desc))
-            saveEvents()
+            
+            // Save to file
+            try {
+                val json = gson.toJson(events)
+                File(filesDir, "events.json").writeText(json)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            
             Toast.makeText(this, "Evento salvo!", Toast.LENGTH_SHORT).show()
             showHome()
         } else {
