@@ -1,0 +1,178 @@
+# OpenAgenda Kivy Layout
+
+# Home Screen
+<HomeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        # Header
+        BoxLayout:
+            size_hint_y: None
+            height: 80
+            Label:
+                text: 'OpenAgenda v1.4'
+                font_size: 28
+                color: 1, 1, 1, 1
+        
+        # Weather Card
+        BoxLayout:
+            size_hint_y: None
+            height: 80
+            canvas:
+                Color: 1, 1, 1, 0.15
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [15]
+            Label:
+                id: weather_label
+                text: '🌤️ Carregando...'
+                font_size: 20
+                color: 1, 1, 1, 1
+        
+        # Event Count
+        BoxLayout:
+            size_hint_y: None
+            height: 80
+            canvas:
+                Color: 1, 1, 1, 0.15
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [15]
+            Label:
+                id: event_count
+                text: '📅 0 eventos'
+                font_size: 20
+                color: 1, 1, 1, 1
+        
+        # Buttons
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+            
+            Button:
+                text: '➕ Adicionar Evento'
+                size_hint_y: None
+                height: 60
+                background_color: 0.3, 0.5, 0.9, 1
+                on_press: root.manager.current = 'add'
+            
+            Button:
+                text: '📋 Ver Eventos'
+                size_hint_y: None
+                height: 60
+                background_color: 0.2, 0.8, 0.7, 1
+                on_press: root.manager.current = 'list'
+            
+            Button:
+                text: '⚙️ Configurações'
+                size_hint_y: None
+                height: 60
+                background_color: 1.0, 0.5, 0.3, 1
+                on_press: root.manager.current = 'settings'
+
+# Add Event Screen
+<AddEventScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        Label:
+            text: 'Novo Evento'
+            font_size: 24
+            color: 1, 1, 1, 1
+        
+        TextInput:
+            id: title_input
+            hint_text: 'Título do evento'
+            size_hint_y: None
+            height: 50
+            multiline: False
+        
+        TextInput:
+            id: date_input
+            hint_text: 'Data (DD/MM/AAAA)'
+            size_hint_y: None
+            height: 50
+            multiline: False
+        
+        TextInput:
+            id: time_input
+            hint_text: 'Hora (HH:MM)'
+            size_hint_y: None
+            height: 50
+            multiline: False
+        
+        TextInput:
+            id: desc_input
+            hint_text: 'Descrição'
+            size_hint_y: None
+            height: 100
+            multiline: True
+        
+        Button:
+            text: '💾 Salvar'
+            size_hint_y: None
+            height: 60
+            background_color: 0.3, 0.8, 0.4, 1
+            on_press: root.save_event()
+        
+        Button:
+            text: '⬅️ Voltar'
+            size_hint_y: None
+            height: 50
+            background_color: 0.5, 0.5, 0.5, 1
+            on_press: root.manager.current = 'home'
+
+# Event List Screen
+<EventListScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+        
+        Label:
+            text: 'Meus Eventos'
+            font_size: 24
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        
+        ScrollView:
+            id: events_container
+            do_scroll_x: False
+
+# Settings Screen
+<SettingsScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        Label:
+            text: 'Configurações'
+            font_size: 24
+            color: 1, 1, 1, 1
+        
+        Label:
+            text: 'Tema:'
+            color: 1, 1, 1, 1
+            size_hint_y: None
+        
+        Spinner:
+            id: theme_spinner
+            text: 'Dark'
+            values: ['Dark', 'Light']
+            size_hint_y: None
+            height: 50
+        
+        Button:
+            text: '⬅️ Voltar'
+            size_hint_y: None
+            height: 50
+            background_color: 0.5, 0.5, 0.5, 1
+            on_press: root.manager.current = 'home'
