@@ -66,7 +66,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   Future<void> _fetchWeather() async {
     try {
       final response = await http.get(
-        Uri.parse("https://api.openweathermap.org/data/2.5/weather?q=SaoPaulo&appid=$API_KEY&units=metric"),
+        Uri.parse("https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo,BR&appid=$API_KEY&units=metric"),
       ).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
