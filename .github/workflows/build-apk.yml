@@ -24,17 +24,22 @@ jobs:
     
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install buildozer cython
     
-    - name: Build APK
+    - name: Build debug APK
       env:
         ANDROID_HOME: ${{ env.ANDROID_HOME }}
         ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+        BUILDZERODEV: 1
       run: |
-        buildozer android
+        buildozer android_debug 2>&1 | tee build.log
     
-    - name: Upload APK
+    - name: Upload debug APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
-        name: OpenAgenda-APK
-        path: bin/*.apk
+        name: OpenAgenda-debug-APK
+        path: |
+          bin/*.apk
+          build.log
