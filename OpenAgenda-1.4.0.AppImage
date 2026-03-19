@@ -3,6 +3,39 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
+║   OpenAgenda v1.4 - Ultimate 2025 Experience (AppImage)                    ║
+║   © 2025 Open-Agenda Team                                                    ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+This is a portable AppImage-style package.
+Run: chmod +x OpenAgenda-1.4.0.AppImage && ./OpenAgenda-1.4.0.AppImage
+"""
+
+import sys
+import os
+
+# Get the directory where this script is located
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    # Running as Python script
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Change to the script directory
+os.chdir(BASE_DIR)
+
+# Add current directory to path
+sys.path.insert(0, BASE_DIR)
+
+# Import and run the main application
+# The actual app code is embedded below
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
 ║   ███████╗██████╗  ██████╗ ███████╗    ██████╗  █████╗ ██████╗  █████╗ ██████╗  ║
 ║   ██╔════╝██╔══██╗██╔═══██╗██╔════╝   ██╔═══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗ ║
 ║   █████╗  ██████╔╝██║   ██║█████╗     ██║   ██║███████║██████╔╝███████║██████╔╝ ║

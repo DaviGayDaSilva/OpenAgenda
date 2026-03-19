@@ -1,0 +1,19 @@
+Package: open-agenda
+Architecture: all
+Version: 1.4.0
+Maintainer: Open-Agenda Team <team@open-agenda.org>
+Depends: python3, python3-tk
+Description: OpenAgenda v1.4 - Ultimate 2025 Experience
+ The ultimate agenda - Now with auto-update, weather, and enhanced UI!
+ .
+ Features:
+  - Auto-update from GitHub
+  - Weather via OpenWeather API
+  - Glassmorphism & frosted glass effects
+  - Vibrant gradient backgrounds
+  - Neon glow effects
+  - Modern floating elements
+  - Dark mode with neon accents
+  - Dashboard stats
+  - Auto-save with local storage
+  - Search

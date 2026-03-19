@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=OpenAgenda
+Comment=OpenAgenda v1.4 - Ultimate 2025 Experience
+Exec=open-agenda
+Icon=open-agenda-icon
+Terminal=false
+Type=Application
+Categories=Office;Calendar;
+Keywords=agenda;calendar;schedule;event;
+StartupNotify=true
