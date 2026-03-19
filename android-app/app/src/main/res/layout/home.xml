@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#0D0D1A">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="OpenAgenda v1.4"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="30dp"/>
+
+    <!-- Weather Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        app:cardCornerRadius="15dp"
+        app:cardBackgroundColor="#26FFFFFF"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <TextView
+            android:id="@+id/weatherText"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="🌤️ Carregando..."
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="center"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Event Count Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        app:cardCornerRadius="15dp"
+        app:cardBackgroundColor="#26FFFFFF"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <TextView
+            android:id="@+id/eventCount"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="📅 0 eventos"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="center"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Buttons -->
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="➕ Adicionar Evento"
+        android:backgroundTint="#4D7CFF"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="10dp"
+        android:onClick="goToAddEvent"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="📋 Ver Eventos"
+        android:backgroundTint="#33CCBB"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="10dp"
+        android:onClick="goToEventList"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="⚙️ Configurações"
+        android:backgroundTint="#FF7F50"
+        android:textColor="#FFFFFF"
+        android:onClick="goToSettings"/>
+
+</LinearLayout>

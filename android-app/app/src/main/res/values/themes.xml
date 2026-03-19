@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.OpenAgenda" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#4D7CFF</item>
+        <item name="colorPrimaryVariant">#3366CC</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#33CCBB</item>
+        <item name="colorSecondaryVariant">#33CCBB</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:statusBarColor">#0D0D1A</item>
+        <item name="android:windowBackground">#0D0D1A</item>
+    </style>
+</resources>
