@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:geolocator/geolocator.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 ULTIMATE 2025 COLOR PALETTE
@@ -56,17 +57,68 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   String _temp = "--°C";
   String _desc = "📍 Carregando...";
   String _icon = "🌤️";
+  double? _lat;
+  double? _lon;
 
   @override
   void initState() {
     super.initState();
-    _fetchWeather();
+    _getLocationAndWeather();
   }
 
-  Future<void> _fetchWeather() async {
+  Future<void> _getLocationAndWeather() async {
     try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Fallback to São Paulo if location is disabled
+        _fetchWeather(null, null);
+        return;
+      }
+
+      // Check and request permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _fetchWeather(null, null);
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _fetchWeather(null, null);
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      );
+      
+      _lat = position.latitude;
+      _lon = position.longitude;
+      _fetchWeather(_lat, _lon);
+      
+    } catch (e) {
+      // Fallback to São Paulo on error
+      _fetchWeather(null, null);
+    }
+  }
+
+  Future<void> _fetchWeather(double? lat, double? lon) async {
+    try {
+      String url;
+      if (lat != null && lon != null) {
+        // Use coordinates for weather
+        url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$API_KEY&units=metric";
+      } else {
+        // Fallback to São Paulo
+        url = "https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo,BR&appid=$API_KEY&units=metric";
+      }
+      
       final response = await http.get(
-        Uri.parse("https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo,BR&appid=$API_KEY&units=metric"),
+        Uri.parse(url),
       ).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
@@ -89,7 +141,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         
         setState(() {
           _temp = "$temp°C";
-          _desc = "📍 São Paulo - ${desc[0].toUpperCase()}${desc.substring(1)}";
+          _desc = "📍 ${data['name']} - ${desc[0].toUpperCase()}${desc.substring(1)}";
           _icon = iconMap[iconCode] ?? "🌤️";
         });
       }
