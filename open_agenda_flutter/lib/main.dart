@@ -91,17 +91,28 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         return;
       }
 
-      // Get current position
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-      );
+      // Get current position with timeout
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.low,
+        ).timeout(const Duration(seconds: 15));
+      } catch (e) {
+        // Timeout or error getting position
+        _fetchWeather(null, null);
+        return;
+      }
       
-      _lat = position.latitude;
-      _lon = position.longitude;
-      _fetchWeather(_lat, _lon);
+      if (position != null) {
+        _lat = position.latitude;
+        _lon = position.longitude;
+        _fetchWeather(_lat, _lon);
+      } else {
+        _fetchWeather(null, null);
+      }
       
     } catch (e) {
-      // Fallback to São Paulo on error
+      // Fallback to São Paulo on any error
       _fetchWeather(null, null);
     }
   }
@@ -126,6 +137,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         final temp = data['main']['temp'].toInt();
         final desc = data['weather'][0]['description'];
         final iconCode = data['weather'][0]['icon'];
+        final cityName = data['name'] ?? 'Local';
         
         final iconMap = {
           '01d': '☀️', '01n': '🌙',
@@ -141,8 +153,13 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         
         setState(() {
           _temp = "$temp°C";
-          _desc = "📍 ${data['name']} - ${desc[0].toUpperCase()}${desc.substring(1)}";
+          _desc = "📍 $cityName - ${desc[0].toUpperCase()}${desc.substring(1)}";
           _icon = iconMap[iconCode] ?? "🌤️";
+        });
+      } else {
+        setState(() {
+          _temp = "--°C";
+          _desc = "📍 Erro: ${response.statusCode}";
         });
       }
     } catch (e) {
