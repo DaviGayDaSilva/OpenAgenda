@@ -113,6 +113,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       
     } catch (e) {
       // Fallback to São Paulo on any error
+      print("Location error: $e");
       _fetchWeather(null, null);
     }
   }
@@ -163,38 +164,64 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         });
       }
     } catch (e) {
+      String errorMsg = e.toString();
       setState(() {
         _temp = "--°C";
-        _desc = "📍 Erro ao carregar";
+        // Show more specific error
+        if (errorMsg.contains('SocketException')) {
+          _desc = "📍 Sem internet";
+        } else if (errorMsg.contains('TimeoutException')) {
+          _desc = "📍 Tempo esgotado";
+        } else {
+          _desc = "📍 Erro: $errorMsg";
+        }
       });
     }
   }
 
+  void refresh() {
+    _getLocationAndWeather();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.bgGlass,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Text(_icon, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 10),
-          Text(
-            _temp,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              _desc,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      onTap: refresh,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.bgGlass,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Text(_icon, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 10),
+            Text(
+              _temp,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _desc,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    "Toque para atualizar",
+                    style: TextStyle(fontSize: 9, color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.refresh, color: AppColors.textMuted, size: 18),
+          ],
+        ),
       ),
     );
   }
