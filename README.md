@@ -4,6 +4,9 @@
 
 ---
 
+## Aviso Importante
+> O App usa permissão de localização pra nada de malicioso, só pra mostrar a temperatura então se estiver rodando em segundo plano ou usando toda hora, provavelmente você baixou 1 versão maliciosa feito por outro usuário, acesse sempre pelo repo original pra evitar coisas maliciosas
+
 ## 🌟 Features
 
 - 🌙 **Beautiful Modern Dark Interface** - Easy on the eyes
