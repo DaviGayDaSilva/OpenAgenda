@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,txt
 source.patterns = {'main': 'main.py'}
 
-version = 1.4.0
+version = 1.4.1
 
 requirements = python3,kivy==2.3.0,requests
 

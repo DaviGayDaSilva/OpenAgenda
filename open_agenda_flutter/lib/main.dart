@@ -41,9 +41,273 @@ class AppColors {
 }
 
 const String API_KEY = "cc4577b215b574d3700c5be607a104c1";
+const String GNEWS_API_KEY = "f33486a8579758c2746e042a1632b4ea";
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🌤️ WEATHER WIDGET
+// 📰 NEWS PANEL WIDGET (GNews API)
+// ═══════════════════════════════════════════════════════════════════════════
+
+class NewsPanelWidget extends StatefulWidget {
+  const NewsPanelWidget({super.key});
+
+  @override
+  State<NewsPanelWidget> createState() => _NewsPanelWidgetState();
+}
+
+class _NewsPanelWidgetState extends State<NewsPanelWidget> {
+  List<Map<String, dynamic>> _articles = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNews();
+  }
+
+  Future<void> _fetchNews() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://gnews.io/api/v4/top-headlines?country=br&lang=pt&max=3'),
+        headers: {'Authorization': 'Bearer $GNEWS_API_KEY'},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _articles = List<Map<String, dynamic>>.from(data['articles'] ?? []);
+          _loading = false;
+        });
+      } else {
+        setState(() => _loading = false);
+      }
+    } catch (e) {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.bgGlass,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('📰 Ultimas Noticias', style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              )),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: AppColors.textMuted, size: 18),
+                onPressed: _fetchNews,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_loading)
+            const Center(child: CircularProgressIndicator(color: AppColors.neonCyan))
+          else if (_articles.isEmpty)
+            const Text('Configure a API GNews para ver noticias',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12))
+          else
+            ...(_articles.take(2).map((article) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article['title'] ?? '',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    article['source']?['name'] ?? '',
+                    style: const TextStyle(fontSize: 10, color: AppColors.neonCyan),
+                  ),
+                ],
+              ),
+            ))),
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🤖 VIRTUAL ASSISTANT SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+
+class AssistantScreen extends StatefulWidget {
+  const AssistantScreen({super.key});
+
+  @override
+  State<AssistantScreen> createState() => _AssistantScreenState();
+}
+
+class _AssistantScreenState extends State<AssistantScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, dynamic>> _messages = [];
+
+  final Map<String, String> _knowledgeBase = {
+    'evento': 'Para criar um evento, va para "+ Adicionar Evento" e preencha os campos.',
+    'adicionar': 'Para adicionar um evento, va para a tela Adicionar Evento.',
+    'calendario': 'Voce pode ver todos os eventos na aba Lista de Eventos.',
+    'lista': 'A lista mostra todos os eventos cadastrados.',
+    'tema': 'Em Configuracoes voce pode escolher tema Dark ou Light.',
+    'clima': 'O aplicativo mostra o clima atual de Sao Paulo.',
+    'ajuda': 'Sou o assistente OpenAgenda! Posso ajudar com duvidas sobre o app.',
+    'oi': 'Olá! Sou o assistente virtual do OpenAgenda! Como posso ajudar?',
+    'ola': 'Olá! Sou o assistente virtual do OpenAgenda! Como posso ajudar?',
+    'sobre': 'OpenAgenda v1.4.1 - Seu assistente pessoal para gerenciar eventos.',
+    'versao': 'OpenAgenda versao 1.4.1 - Novidades: News Panel e Assistente Virtual.',
+  };
+
+  String _getResponse(String message) {
+    final lowerMessage = message.toLowerCase();
+    for (var entry in _knowledgeBase.entries) {
+      if (lowerMessage.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+    return 'Desculpe, nao entendi. Tente perguntar de outra forma!';
+  }
+
+  void _sendMessage() {
+    if (_controller.text.trim().isEmpty) return;
+
+    final userMsg = _controller.text;
+    final response = _getResponse(userMsg);
+
+    setState(() {
+      _messages.add({'text': userMsg, 'isUser': true});
+      _messages.add({'text': response, 'isUser': false});
+    });
+
+    _controller.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgPrimary,
+      appBar: AppBar(
+        title: const Text('🤖 Assistente Virtual'),
+        backgroundColor: AppColors.bgSecondary,
+        foregroundColor: AppColors.textPrimary,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: _messages.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🤖', style: TextStyle(fontSize: 48)),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Olá! Sou o Assistente OpenAgenda!\nPosso tirar duvidas sobre o app.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = _messages[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: msg['isUser']
+                              ? AppColors.neonPurple.withOpacity(0.3)
+                              : AppColors.bgGlass,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              msg['isUser'] ? 'Voce' : '🤖 Assistente',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: msg['isUser']
+                                    ? AppColors.neonPink
+                                    : AppColors.neonCyan,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              msg['text'],
+                              style: const TextStyle(color: AppColors.textPrimary),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            color: AppColors.bgSecondary,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Digite sua duvida...',
+                      hintStyle: const TextStyle(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: AppColors.bgTertiary,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.send, color: AppColors.neonCyan),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
 // ═══════════════════════════════════════════════════════════════════════════
 
 class WeatherWidget extends StatefulWidget {
@@ -71,7 +335,6 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        // Fallback to São Paulo if location is disabled
         _fetchWeather(null, null);
         return;
       }
@@ -98,7 +361,6 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           desiredAccuracy: LocationAccuracy.low,
         ).timeout(const Duration(seconds: 15));
       } catch (e) {
-        // Timeout or error getting position
         _fetchWeather(null, null);
         return;
       }
@@ -112,7 +374,6 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       }
       
     } catch (e) {
-      // Fallback to São Paulo on any error
       print("Location error: $e");
       _fetchWeather(null, null);
     }

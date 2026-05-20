@@ -1,4 +1,4 @@
-# OpenAgenda Kivy Layout
+# OpenAgenda Kivy Layout v1.4.1
 
 # Home Screen
 <HomeScreen>:
@@ -12,7 +12,7 @@
             size_hint_y: None
             height: 80
             Label:
-                text: 'OpenAgenda v1.4'
+                text: 'OpenAgenda v1.4.1'
                 font_size: 28
                 color: 1, 1, 1, 1
         
@@ -32,10 +32,25 @@
                 font_size: 20
                 color: 1, 1, 1, 1
         
+        # News Panel (Painel de Notícias)
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: 150
+            canvas:
+                Color: 1, 1, 1, 0.1
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [15]
+            ScrollView:
+                id: news_container
+                do_scroll_x: False
+        
         # Event Count
         BoxLayout:
             size_hint_y: None
-            height: 80
+            height: 60
             canvas:
                 Color: 1, 1, 1, 0.15
                 RoundedRectangle:
@@ -45,7 +60,7 @@
             Label:
                 id: event_count
                 text: '📅 0 eventos'
-                font_size: 20
+                font_size: 18
                 color: 1, 1, 1, 1
         
         # Buttons
@@ -66,6 +81,13 @@
                 height: 60
                 background_color: 0.2, 0.8, 0.7, 1
                 on_press: root.manager.current = 'list'
+            
+            Button:
+                text: '🤖 Assistente Virtual'
+                size_hint_y: None
+                height: 60
+                background_color: 0.6, 0.3, 0.8, 1
+                on_press: root.manager.current = 'assistant'
             
             Button:
                 text: '⚙️ Configurações'
@@ -169,6 +191,50 @@
             values: ['Dark', 'Light']
             size_hint_y: None
             height: 50
+        
+        Button:
+            text: '⬅️ Voltar'
+            size_hint_y: None
+            height: 50
+            background_color: 0.5, 0.5, 0.5, 1
+            on_press: root.manager.current = 'home'
+
+# Assistant Screen (Assistente Virtual)
+<AssistantScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        Label:
+            text: '🤖 Assistente Virtual'
+            font_size: 24
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        
+        # Chat Container
+        ScrollView:
+            id: chat_container
+            do_scroll_x: False
+        
+        # Input Area
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            TextInput:
+                id: user_input
+                hint_text: 'Digite sua dúvida...'
+                multiline: False
+                size_hint_x: 0.8
+            
+            Button:
+                text: '➤'
+                size_hint_x: 0.2
+                background_color: 0.6, 0.3, 0.8, 1
+                on_press: root.send_message()
         
         Button:
             text: '⬅️ Voltar'
